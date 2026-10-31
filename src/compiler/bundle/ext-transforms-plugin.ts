@@ -28,6 +28,7 @@ type ComponentStyle = {
 };
 type ComponentStyleMap = Map<string, ComponentStyle>;
 const allCmpStyles = new Map<string, ComponentStyleMap>();
+
 const getComponentStyleEntries = (
   cmpStyles: ComponentStyleMap | undefined,
   externalStyles: d.ExternalStyleCompiler[] | undefined,

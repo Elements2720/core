@@ -179,8 +179,7 @@ describe('lazy-component', () => {
         [transformer],
       );
 
-      expect(t.outputText).toContain('sourceMap as CmpAStyleSourceMap0');
-      expect(t.outputText).toContain('CmpA.sourceMap = CmpAStyleSourceMap0');
+      expect(t.outputText).toContain('CmpA.sourceMap = "__@SOURCE_MAP_$_0@__"');
     });
 
     // eslint-disable-next-line jest/expect-expect

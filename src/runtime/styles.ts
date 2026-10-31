@@ -133,7 +133,7 @@ export const addStyle = (styleContainerNode: any, cmpMeta: d.ComponentRuntimeMet
         // For scoped components, check if they have their own HMR-created style element
         const existingStyleElm: HTMLStyleElement =
           (BUILD.hydrateClientSide || BUILD.hotModuleReplacement) &&
-          styleContainerNode.querySelectorAll(`[${HYDRATED_STYLE_ID}="${scopeId}"]`).item(styleIndex);
+          styleContainerNode.querySelectorAll(`[${HYDRATED_STYLE_ID}="${scopeId}"]`)[styleIndex];
 
         let styleElm: HTMLStyleElement;
         if (existingStyleElm) {

@@ -85,7 +85,7 @@ export const optimizeModule = async (
     }
 
     minifyOpts.format ||= {};
-    minifyOpts.format.quote_style = 1;
+    minifyOpts.format.quote_style = 2;
     const compressOpts = minifyOpts.compress as CompressOptions;
     const mangleOptions = minifyOpts.mangle as MangleOptions;
 
@@ -112,6 +112,7 @@ export const optimizeModule = async (
 
   const shouldTranspile = opts.sourceTarget === 'es5';
   const results = await compilerCtx.worker.prepareModule(code, minifyOpts, shouldTranspile, !!opts.inlineHelpers);
+
   if (
     results != null &&
     typeof results.output === 'string' &&

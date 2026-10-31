@@ -105,7 +105,7 @@ export const parseCssImports = async (
       styleText,
       {
         from: resolvedFilePath,
-        to: resolvedFilePath,
+        to: config.rootDir,
         map: {
           inline: false,
           annotation: false,

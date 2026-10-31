@@ -92,10 +92,10 @@ export const createStyleSourceMapLiteral = (cmp: d.ComponentCompilerMeta, buildC
       }
       const value =
         identifiers.length === 1
-          ? ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`)
+          ? ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`, false)
           : ts.factory.createArrayLiteralExpression(
               identifiers.map((_, index) =>
-                ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_${index}@__`),
+                ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_${index}@__`, false),
               ),
             );
       sourceMapModes.push(ts.factory.createPropertyAssignment(style.modeName, value));
@@ -105,7 +105,7 @@ export const createStyleSourceMapLiteral = (cmp: d.ComponentCompilerMeta, buildC
       sourceMapModes.push(
         ts.factory.createPropertyAssignment(
           style.modeName,
-          ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`),
+          ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`, false),
         ),
       );
     }

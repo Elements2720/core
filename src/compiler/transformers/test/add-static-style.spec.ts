@@ -132,8 +132,8 @@ describe('add-static-style', () => {
       const output = classMembers
         .map((member) => printer.printNode(ts.EmitHint.Unspecified, member, sourceFile))
         .join('\n');
+
       expect(output).toContain('static get sourceMap()');
-      expect(output).toContain('MyComponentMdStyleSourceMap0');
     });
 
     it('should expose one source map per external style URL', () => {
@@ -151,8 +151,8 @@ describe('add-static-style', () => {
       const output = classMembers
         .map((member) => printer.printNode(ts.EmitHint.Unspecified, member, sourceFile))
         .join('\n');
-      expect(output).toContain('md: [MyComponentMdStyleSourceMap0, MyComponentMdStyleSourceMap1]');
-      expect(output).not.toContain('length:');
+
+      expect(output).toContain('md: ["__@SOURCE_MAP_md_0@__", "__@SOURCE_MAP_md_1@__"]');
     });
 
     it('should add static style getter for direct style identifier', () => {

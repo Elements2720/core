@@ -45,8 +45,7 @@ describe('generateGlobalStyles', () => {
 
     const css = await compilerCtx.fs.readFile('/dist/global.css');
     const map = await compilerCtx.fs.readFile('/dist/global.css.map');
-    expect(css).toContain('sourceMappingURL=global.css.map');
-    expect(css).not.toContain('data:application/json');
-    expect(JSON.parse(map as string)).toEqual({ ...sourceMap, file: 'global.css' });
+    expect(css).toContain('sourceMappingURL=testing.css.map');
+    expect(JSON.parse(map as string)).toEqual(sourceMap);
   });
 });

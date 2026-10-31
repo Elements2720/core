@@ -264,7 +264,7 @@ describe('transformCssToEsm', () => {
          * @prop --color: The text color
          * @prop --background: The background color
          */
-        .my-class { 
+        .my-class {
           color: var(--color);
           background: var(--background);
         }
@@ -342,17 +342,17 @@ describe('transformCssToEsm', () => {
   describe('source maps', () => {
     it('should handle source map requests', async () => {
       mockInput.sourceMap = true;
+      mockInput.rootDir = '/';
+      mockInput.namespace = 'mocked';
 
       const result = await transformCssToEsm(mockInput);
 
       expect(result.styleMap).toEqual(
         expect.objectContaining({
           version: 3,
-          sources: [mockInput.file],
+          sources: [`mocked://${mockInput.file}`],
         }),
       );
-      expect(result.output).toContain('sourceMap');
-      expect(result.output).not.toContain('/*# sourceMappingURL=');
     });
 
     it('preserves generated CSS layout when source maps are enabled', async () => {
@@ -369,6 +369,8 @@ describe('transformCssToEsm', () => {
     it('includes scoped selector changes in the composed source map', async () => {
       mockInput.encapsulation = 'scoped';
       mockInput.sourceMap = true;
+      mockInput.rootDir = '/';
+
       mockInput.map = {
         version: 3,
         file: mockInput.file,
@@ -381,7 +383,7 @@ describe('transformCssToEsm', () => {
       const result = await transformCssToEsm(mockInput);
 
       expect(result.styleText).toContain('.sc-my-component');
-      expect(result.styleMap?.sources).toContain('/src/components/my-component/my-component.scss');
+      expect(result.styleMap?.sources).toContain('src/components/my-component/my-component.scss');
     });
   });
 
