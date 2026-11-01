@@ -287,7 +287,7 @@ export interface BuildCtx {
   /**
    * A promise that resolves to the global styles for the current build.
    */
-  stylesPromise: Promise<string>;
+  stylesPromise: Promise<{ css: string; map?: string }>;
   stylesUpdated: BuildStyleUpdate[];
   timeSpan: LoggerTimeSpan;
   timestamp: string;
@@ -516,7 +516,7 @@ export interface CompilerCtx {
   cssModuleImports: Map<string, string[]>;
   cachedGlobalStyle: {
     css: string;
-    map?: string;
+    map?: SourceMap;
   };
   collections: CollectionCompilerMeta[];
   compilerOptions: any;
@@ -2230,7 +2230,7 @@ export interface TransformCssToEsmInput {
    * is not shared by multiple fields, nor is it a composite of multiple modes).
    */
   mode?: string;
-  sourceMap?: boolean;
+  sourceMap?: boolean | 'inline';
   map?: SourceMap | string;
   minify?: boolean;
   docs?: boolean;

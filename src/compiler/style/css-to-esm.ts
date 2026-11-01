@@ -1,11 +1,20 @@
-import { catchError, createJsVarName, DEFAULT_STYLE_MODE, hasError, isString, normalizePath, resolve } from '@utils';
+import {
+  catchError,
+  createJsVarName,
+  DEFAULT_STYLE_MODE,
+  hasError,
+  isString,
+  normalizePath,
+  resolve,
+  sourceMapToDataUrl,
+} from '@utils';
 import { scopeCss } from '@utils/shadow-css';
 import MagicString from 'magic-string';
 import sourceMapMerge from 'merge-source-map';
 import path from 'path';
 
 import type * as d from '../../declarations';
-import { STENCIL_CORE_ID } from '../bundle/entry-alias-ids';
+import { STENCIL_CORE_ID, STENCIL_INTERNAL_ID } from '../bundle/entry-alias-ids';
 import { parseStyleDocs } from '../docs/style-docs';
 import { createCssSourceMap } from '../optimize/minify-css';
 import { optimizeCss } from '../optimize/optimize-css';
@@ -72,7 +81,7 @@ export const transformCssToEsm = async (input: d.TransformCssToEsmInput): Promis
     filePath: input.file,
     map: results.styleMap,
     minify: input.minify !== false,
-    sourceMap: input.sourceMap,
+    sourceMap: !!input.sourceMap,
   });
 
   results.diagnostics.push(...optimizeResults.diagnostics);
@@ -157,7 +166,7 @@ const transformCssToEsmModule = (input: d.TransformCssToEsmInput): d.TransformCs
     results.styleMap = createCssSourceMap(input.input, results.styleText, input.file || 'input.css');
     const previousMap = parseSourceMap(input.map);
     if (previousMap) {
-      results.styleMap = mergeSourceMaps(previousMap, results.styleMap);
+      results.styleMap = sourceMapMerge(previousMap, results.styleMap);
     }
   }
 
@@ -229,6 +238,12 @@ const generateTransformCssToEsm = (
 
     appendStyleFactory(s, results);
     s.append(`module.exports = ${results.defaultVarName};`);
+    if (input.sourceMap === true) {
+      s.append(`\nconst { getPublicPath } = require('${STENCIL_INTERNAL_ID}');`);
+      s.append(`\nmodule.exports.sourceMap = getPublicPath() + '${input.tag}.css.map'};`);
+    } else if (input.sourceMap === 'inline') {
+      s.append(`\nmodule.exports.sourceMap = ${sourceMapToDataUrl(results.styleSourceMap)};`);
+    }
   } else {
     // ESM
     if (input.addTagTransformers) {
@@ -240,6 +255,12 @@ const generateTransformCssToEsm = (
 
     appendStyleFactory(s, results);
     s.append(`export default ${results.defaultVarName};`);
+    if (input.sourceMap === true) {
+      s.append(`\nimport { getPublicPath } from '${STENCIL_INTERNAL_ID}';`);
+      s.append(`\nexport const sourceMap = getPublicPath() + '${input.tag}.css.map';`);
+    } else if (input.sourceMap === 'inline') {
+      s.append(`\nexport const sourceMap = ${sourceMapToDataUrl(results.styleSourceMap)};`);
+    }
   }
 
   results.output = s.toString();
@@ -263,11 +284,6 @@ const parseSourceMap = (map?: d.SourceMap | string) => {
     }
   }
   return map;
-};
-
-const mergeSourceMaps = (previousMap: d.SourceMap, nextMap: d.SourceMap) => {
-  // The package maps generated positions in `nextMap` through the original positions in `previousMap`.
-  return sourceMapMerge(previousMap, nextMap) as d.SourceMap;
 };
 
 /**

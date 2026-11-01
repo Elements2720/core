@@ -21,6 +21,7 @@ export const writeLazyModule = async (
 
   const writes: Promise<FsWriteResults>[] = [];
 
+  const assetPaths: string[] = [];
   for (const [mode, sourceMaps] of rollupResult.sourceMapsByMode.entries()) {
     Object.values(sourceMaps).forEach((sourceMap, i) => {
       const mapReference = `./${fileName}.${mode}.${i}.css.map`;
@@ -30,9 +31,12 @@ export const writeLazyModule = async (
       });
 
       const url = format === 'cjs' ? `'file://' + __filename` : 'import.meta.url';
-      const runtimeUrlExpression = `new URL('${mapReference}', ${url}).href`;
-      code = code.replace(`"__@SOURCE_MAP_${mode}_${i}@__"`, runtimeUrlExpression);
+      assetPaths.push(`new URL('${mapReference}', ${url}).href`);
     });
+  }
+
+  if (assetPaths.length > 0) {
+    code += bundleId[0].toUpperCase() + bundleId.slice(1) + '.getAssetUrls = () => [' + assetPaths.join(',') + '];';
   }
 
   destinations.forEach((dst) => {

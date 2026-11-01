@@ -1,4 +1,4 @@
-import { catchError, isOutputTargetDistGlobalStyles, normalizePath } from '@utils';
+import { catchError, isOutputTargetDistGlobalStyles, normalizePath, sourceMapToDataUrl } from '@utils';
 import { basename } from 'path';
 
 import type * as d from '../../declarations';
@@ -13,7 +13,7 @@ export const generateGlobalStyles = async (
 ) => {
   const outputTargets = config.outputTargets.filter(isOutputTargetDistGlobalStyles);
   if (outputTargets.length === 0) {
-    return '';
+    return { css: '' };
   }
 
   const globalStyles = await buildGlobalStyles(config, compilerCtx, buildCtx);
@@ -21,7 +21,17 @@ export const generateGlobalStyles = async (
     await Promise.all(outputTargets.map((o) => writeGlobalStyle(compilerCtx, o.file, globalStyles)));
   }
 
-  return globalStyles?.css;
+  if (config.sourceMapCss) {
+    return {
+      css: globalStyles.css,
+      map:
+        config.sourceMapCss === 'inline'
+          ? sourceMapToDataUrl(JSON.stringify(globalStyles.map))
+          : `${basename(config.fsNamespace)}.css.map`,
+    };
+  }
+
+  return { css: globalStyles.css };
 };
 
 const buildGlobalStyles = async (config: d.ValidatedConfig, compilerCtx: d.CompilerCtx, buildCtx: d.BuildCtx) => {
@@ -75,7 +85,7 @@ const buildGlobalStyles = async (config: d.ValidatedConfig, compilerCtx: d.Compi
       const map = typeof optimizedResult === 'string' ? undefined : optimizedResult.map;
 
       compilerCtx.cachedGlobalStyle = {
-        css: optimizedCss + `\n/*# sourceMappingURL=${basename(config.fsNamespace)}.css.map */`,
+        css: optimizedCss,
         map,
       };
 
@@ -96,7 +106,8 @@ const buildGlobalStyles = async (config: d.ValidatedConfig, compilerCtx: d.Compi
           styleTag: 'global',
           styleMode: undefined,
           styleText: typeof optimizedResult === 'string' ? optimizedResult : optimizedResult.output,
-          styleSourceMap: typeof optimizedResult === 'string' ? undefined : sourceMapToDataUrl(optimizedResult.map),
+          styleSourceMap:
+            typeof optimizedResult === 'string' ? undefined : sourceMapToDataUrl(JSON.stringify(optimizedResult.map)),
         });
       }
 
@@ -114,7 +125,7 @@ const buildGlobalStyles = async (config: d.ValidatedConfig, compilerCtx: d.Compi
 const writeGlobalStyle = async (
   compilerCtx: d.CompilerCtx,
   filePath: string,
-  globalStyle: { css: string; map?: string },
+  globalStyle: { css: string; map?: d.SourceMap },
 ) => {
   await compilerCtx.fs.writeFile(filePath, globalStyle.css);
 
@@ -122,11 +133,6 @@ const writeGlobalStyle = async (
     await compilerCtx.fs.writeFile(`${filePath}.map`, JSON.stringify(globalStyle.map));
   }
 };
-
-const sourceMapToDataUrl = (sourceMap?: d.SourceMap) =>
-  sourceMap
-    ? `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(sourceMap)).toString('base64')}`
-    : undefined;
 
 const canSkipGlobalStyles = async (config: d.ValidatedConfig, compilerCtx: d.CompilerCtx, buildCtx: d.BuildCtx) => {
   if (!compilerCtx.cachedGlobalStyle) {

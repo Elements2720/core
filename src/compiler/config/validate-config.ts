@@ -304,7 +304,7 @@ const validateSourceMap = (sourceMap: UnvalidatedConfig['sourceMap'], devMode: b
   if (sourceMap != null && typeof sourceMap === 'object') {
     return {
       sourceMap,
-      sourceMapCss: sourceMap.css === true,
+      sourceMapCss: sourceMap.css === 'inline' ? ('inline' as const) : sourceMap.css === true,
       sourceMapJs: sourceMap.js === true,
     };
   }

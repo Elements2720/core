@@ -1,4 +1,12 @@
-import { hasError, isOutputTargetDistCollection, join, mergeIntoWith, normalizeFsPath, relative } from '@utils';
+import {
+  hasError,
+  isOutputTargetDistCollection,
+  join,
+  mergeIntoWith,
+  normalizeFsPath,
+  relative,
+  sourceMapToDataUrl,
+} from '@utils';
 import type { Plugin } from 'rollup';
 
 import type * as d from '../../declarations';
@@ -142,7 +150,7 @@ export const extTransformsPlugin = (
           }
           cmpStyles = allCmpStyles.get(scopeId);
 
-          if (config.sourceMapCss) {
+          if (config.sourceMapCss === true) {
             if (!buildCtx.sourceMapsByTag.has(data.tag)) {
               buildCtx.sourceMapsByTag.set(data.tag, new Map<string, Record<string, string>>());
             }
@@ -251,8 +259,4 @@ export const extTransformsPlugin = (
       return null;
     },
   };
-};
-
-const sourceMapToDataUrl = (sourceMap: string) => {
-  return `data:application/json;charset=utf-8;base64,${Buffer.from(sourceMap || '').toString('base64')}`;
 };

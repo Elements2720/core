@@ -1,11 +1,13 @@
 import { BUILD } from '@app-data';
-import { globalStyles } from '@app-globals';
+import { globalStyles, globalStylesMap } from '@app-globals';
 import { supportsConstructableStylesheets, supportsMutableAdoptedStyleSheets } from '@platform';
 import { CMP_FLAGS } from '@utils/constants';
 
 import type * as d from '../declarations';
 import { HYDRATED_STYLE_ID } from '../runtime/runtime-constants';
 import { createStyleSheetIfNeededAndSupported } from './style';
+
+const sourceMapRef = 'sourceMappingURL';
 
 let globalStyleSheet: CSSStyleSheet | null | undefined;
 
@@ -27,9 +29,9 @@ export function createShadowRoot(this: HTMLElement, cmpMeta: d.ComponentRuntimeM
   }
 
   const shadowRoot = this.attachShadow(opts);
-
+  const style = globalStylesMap ? globalStyles + `/*# ${sourceMapRef}=${globalStylesMap} */` : globalStyles;
   // Initialize if undefined, set to CSSStyleSheet or null
-  if (globalStyleSheet === undefined) globalStyleSheet = createStyleSheetIfNeededAndSupported(globalStyles) ?? null;
+  if (globalStyleSheet === undefined) globalStyleSheet = createStyleSheetIfNeededAndSupported(style) ?? null;
 
   // Use initialized global stylesheet if available
   if (globalStyleSheet) {
@@ -42,7 +44,7 @@ export function createShadowRoot(this: HTMLElement, cmpMeta: d.ComponentRuntimeM
     // Fallback for dev mode: add global styles as <style> tag in each shadow root
     // Each shadow root needs its own copy when using <style> tags
     const styleElm = document.createElement('style');
-    styleElm.innerHTML = globalStyles;
+    styleElm.innerHTML = style;
 
     // Add sty-id attribute for HMR tracking
     if (BUILD.hotModuleReplacement) {

@@ -34,7 +34,7 @@ export const optimizeCss = async (
     autoprefixer: config.autoprefixCss,
     minify: config.minifyCss,
     map,
-    sourceMap: config.sourceMapCss,
+    sourceMap: !!config.sourceMapCss,
   };
 
   const cacheKey = await compilerCtx.cache.createKey('optimizeCss', optimizeCssId, opts);

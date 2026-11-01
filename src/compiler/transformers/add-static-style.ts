@@ -92,22 +92,11 @@ export const createStyleSourceMapLiteral = (cmp: d.ComponentCompilerMeta, buildC
       }
       const value =
         identifiers.length === 1
-          ? ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`, false)
+          ? ts.factory.createIdentifier(identifiers[0])
           : ts.factory.createArrayLiteralExpression(
-              identifiers.map((_, index) =>
-                ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_${index}@__`, false),
-              ),
+              identifiers.map((identifier) => ts.factory.createIdentifier(identifier)),
             );
       sourceMapModes.push(ts.factory.createPropertyAssignment(style.modeName, value));
-    } else if (typeof style.styleIdentifier === 'string') {
-      const sourceMapIdentifier = `${style.styleIdentifier}SourceMap`;
-      style.sourceMapIdentifiers = [sourceMapIdentifier];
-      sourceMapModes.push(
-        ts.factory.createPropertyAssignment(
-          style.modeName,
-          ts.factory.createStringLiteral(`__@SOURCE_MAP_${style.modeName}_0@__`, false),
-        ),
-      );
     }
   });
 
