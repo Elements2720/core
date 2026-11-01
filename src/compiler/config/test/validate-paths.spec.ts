@@ -123,8 +123,8 @@ describe('validatePaths', () => {
     const { config } = validateConfig(userConfig, mockLoadConfigInit());
     // the path will be normalized by Stencil us use '/', split on that regardless of platform
     const parts = (config.outputTargets as d.OutputTargetDist[])[0].buildDir!.split('/');
-    expect(parts[parts.length - 1]).toBe('build');
-    expect(parts[parts.length - 2]).toBe('www');
+    expect(parts[parts.length - 1]).toBe('www');
+    expect(parts[parts.length - 2]).toBe('my-app');
     expect(path.isAbsolute((config.outputTargets as d.OutputTargetDist[])[0].buildDir!)).toBe(true);
   });
 
@@ -138,8 +138,8 @@ describe('validatePaths', () => {
     const { config } = validateConfig(userConfig, mockLoadConfigInit());
     // the path will be normalized by Stencil us use '/', split on that regardless of platform
     const parts = (config.outputTargets as d.OutputTargetDist[])[0].buildDir!.split('/');
-    expect(parts[parts.length - 1]).toBe('build');
-    expect(parts[parts.length - 2]).toBe('custom-www');
+    expect(parts[parts.length - 1]).toBe('custom-www');
+    expect(parts[parts.length - 2]).toBe('my-app');
     expect(path.isAbsolute((config.outputTargets as d.OutputTargetDist[])[0].buildDir!)).toBe(true);
   });
 

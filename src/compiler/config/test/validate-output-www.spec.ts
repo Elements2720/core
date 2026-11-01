@@ -36,7 +36,7 @@ describe('validateOutputTargetWww', () => {
       {
         appDir: join(rootDir, 'www', 'docs'),
         baseUrl: '/',
-        buildDir: join(rootDir, 'www', 'docs', 'build'),
+        buildDir: join(rootDir, 'www', 'docs'),
         dir: join(rootDir, 'www', 'docs'),
         empty: true,
         indexHtml: join(rootDir, 'www', 'docs', 'index.html'),
@@ -58,8 +58,8 @@ describe('validateOutputTargetWww', () => {
         type: 'www',
       },
       {
-        dir: join(rootDir, 'www', 'docs', 'build'),
-        esmDir: join(rootDir, 'www', 'docs', 'build'),
+        dir: join(rootDir, 'www', 'docs'),
+        esmDir: join(rootDir, 'www', 'docs'),
         isBrowserBuild: true,
         polyfills: true,
         systemDir: undefined,
@@ -68,7 +68,7 @@ describe('validateOutputTargetWww', () => {
       },
       {
         copyAssets: 'dist',
-        dir: join(rootDir, 'www', 'docs', 'build'),
+        dir: join(rootDir, 'www', 'docs'),
         type: 'copy',
       },
       {
@@ -86,7 +86,7 @@ describe('validateOutputTargetWww', () => {
         type: 'copy',
       },
       {
-        file: join(rootDir, 'www', 'docs', 'build', 'app.css'),
+        file: join(rootDir, 'www', 'docs', 'app.css'),
         type: 'dist-global-styles',
       },
     ]);
@@ -105,7 +105,7 @@ describe('validateOutputTargetWww', () => {
 
     expect(www.dir).toBe(join(rootDir, 'www', 'docs'));
     expect(www.appDir).toBe(join(rootDir, 'www', 'docs'));
-    expect(www.buildDir).toBe(join(rootDir, 'www', 'docs', 'build'));
+    expect(www.buildDir).toBe(join(rootDir, 'www', 'docs'));
     expect(www.indexHtml).toBe(join(rootDir, 'www', 'docs', 'index.html'));
   });
 
@@ -134,7 +134,7 @@ describe('validateOutputTargetWww', () => {
 
     const outputTarget = config.outputTargets.find(isOutputTargetWww) as d.OutputTargetWww;
     expect(outputTarget.dir).toBe(join(rootDir, 'www'));
-    expect(outputTarget.buildDir).toBe(join(rootDir, 'www', 'build'));
+    expect(outputTarget.buildDir).toBe(join(rootDir, 'www'));
     expect(outputTarget.indexHtml).toBe(join(rootDir, 'www', 'index.html'));
     expect(outputTarget.empty).toBe(true);
   });
@@ -155,7 +155,7 @@ describe('validateOutputTargetWww', () => {
       expect(www.baseUrl).toBe('/docs/');
       expect(www.appDir).toBe(join(rootDir, 'my-www/docs'));
 
-      expect(www.buildDir).toBe(join(rootDir, 'my-www', 'docs', 'build'));
+      expect(www.buildDir).toBe(join(rootDir, 'my-www', 'docs'));
       expect(www.indexHtml).toBe(join(rootDir, 'my-www', 'docs', 'index.html'));
     });
 
@@ -173,7 +173,7 @@ describe('validateOutputTargetWww', () => {
       expect(www.baseUrl).toBe('/docs/');
       expect(www.appDir).toBe(join(rootDir, 'www/docs'));
 
-      expect(www.buildDir).toBe(join(rootDir, 'www', 'docs', 'build'));
+      expect(www.buildDir).toBe(join(rootDir, 'www', 'docs'));
       expect(www.indexHtml).toBe(join(rootDir, 'www', 'docs', 'index.html'));
     });
 
@@ -191,7 +191,7 @@ describe('validateOutputTargetWww', () => {
       expect(www.baseUrl).toBe('https://example.com/docs/');
       expect(www.appDir).toBe(join(rootDir, 'www/docs'));
 
-      expect(www.buildDir).toBe(join(rootDir, 'www', 'docs', 'build'));
+      expect(www.buildDir).toBe(join(rootDir, 'www', 'docs'));
       expect(www.indexHtml).toBe(join(rootDir, 'www', 'docs', 'index.html'));
     });
   });
@@ -217,7 +217,7 @@ describe('validateOutputTargetWww', () => {
       expect(copyTargets).toEqual([
         {
           copyAssets: 'dist',
-          dir: join(rootDir, 'www', 'docs', 'build'),
+          dir: join(rootDir, 'www', 'docs'),
           type: 'copy',
         },
         {
@@ -261,7 +261,7 @@ describe('validateOutputTargetWww', () => {
       expect(copyTargets).toEqual([
         {
           copyAssets: 'dist',
-          dir: join(rootDir, 'www', 'docs', 'build'),
+          dir: join(rootDir, 'www', 'docs'),
           type: 'copy',
         },
         {
@@ -296,7 +296,7 @@ describe('validateOutputTargetWww', () => {
       expect(copyTargets).toEqual([
         {
           copyAssets: 'dist',
-          dir: join(rootDir, 'www', 'docs', 'build'),
+          dir: join(rootDir, 'www', 'docs'),
           type: 'copy',
         },
         {
