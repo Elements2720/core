@@ -3242,7 +3242,7 @@ export interface TransformOptions {
   proxy: 'defineproperty' | null;
   style: 'static' | null;
   styleImportData: 'queryparams' | null;
-  sourceMapCss?: boolean;
+  sourceMapCss?: boolean | 'inline';
   target?: string;
 }
 

@@ -39,7 +39,7 @@ export class CompilerContext implements d.CompilerCtx {
   rollupCacheHydrate: any = null;
   rollupCacheLazy: any = null;
   rollupCacheNative: any = null;
-  cachedGlobalStyle: { css: string; map: string };
+  cachedGlobalStyle: { css: string; map: d.SourceMap };
   styleModeNames = new Set<string>();
   worker: d.CompilerWorkerContext = null;
 

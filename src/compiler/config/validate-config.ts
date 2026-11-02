@@ -118,7 +118,7 @@ export const validateConfig = (
 
   const hashFileNames = config.hashFileNames ?? !devMode;
   const sourceMap = validateSourceMap(config.sourceMap, devMode);
-
+  console.log(config.minifyCss, devMode);
   const validatedConfig: ValidatedConfig = {
     devServer: {}, // assign `devServer` before spreading `config`, in the event 'devServer' is not a key on `config`
     ...config,

@@ -18,7 +18,7 @@ export const getPublicPath = () => {
   if (typeof __webpack_require__ !== 'undefined' && __webpack_require__.p) return __webpack_require__.p;
 
   // vite
-  const metaBaseUrl = eval(`typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL`);
+  const metaBaseUrl = new Function(`return typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL`)();
   if (metaBaseUrl) return metaBaseUrl;
 
   // client side parcel, esm
