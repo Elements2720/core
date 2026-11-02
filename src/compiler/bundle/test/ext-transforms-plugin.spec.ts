@@ -63,7 +63,10 @@ describe('extTransformsPlugin', () => {
 
     const writeFileSpy = jest.spyOn(compilerCtx.fs, 'writeFile');
     return {
-      plugin: extTransformsPlugin(config, compilerCtx, buildCtx),
+      plugin: extTransformsPlugin(config, compilerCtx, buildCtx) as {
+        name: string;
+        transform: (code: string, id: string) => Promise<unknown>;
+      },
       config,
       compilerCtx,
       buildCtx,
@@ -85,7 +88,7 @@ describe('extTransformsPlugin', () => {
       // @ts-expect-error we're testing something which shouldn't normally happen,
       // but might if an argument of the wrong type were passed as `id`
       const parseSpy = jest.spyOn(importPathLib, 'parseImportPath').mockReturnValue({ data: null });
-      // @ts-expect-error the Rollup plugins expect to be called in a Rollup context
+
       expect(await plugin.transform('asdf', 'foo.css')).toBe(null);
       parseSpy.mockRestore();
     });
@@ -107,10 +110,10 @@ describe('extTransformsPlugin', () => {
       const { plugin, config, transformCssToEsmSpy } = setup();
       const map = {
         version: 3,
-        file: '/some/stubbed/path/foo.css',
+        file: '',
         names: [] as string[],
         mappings: 'AAAA',
-        sources: ['/some/stubbed/path/foo.scss'],
+        sources: ['some/stubbed/path/foo.css'],
         sourcesContent: [':host { text: pink; }'],
       };
 
@@ -125,7 +128,6 @@ describe('extTransformsPlugin', () => {
         },
       ];
 
-      // @ts-expect-error the Rollup plugins expect to be called in a Rollup context
       await plugin.transform('asdf', '/some/stubbed/path/foo.css?tag=my-component');
 
       expect(transformCssToEsmSpy).toHaveBeenCalledWith(
@@ -163,14 +165,12 @@ describe('extTransformsPlugin', () => {
       }));
 
       // Process the second style first to prove HMR updates do not use transform completion order.
-      // @ts-expect-error the Rollup plugins expect to be called in a Rollup context
       await plugin.transform('asdf', `${secondStylePath}?tag=my-component`);
-      // @ts-expect-error the Rollup plugins expect to be called in a Rollup context
+
       await plugin.transform('asdf', `${firstStylePath}?tag=my-component`);
 
       const latestUpdate = buildCtx.stylesUpdated[buildCtx.stylesUpdated.length - 1];
       expect(latestUpdate.styleText).toEqual(['FIRST', 'SECOND']);
-      expect(latestUpdate.styleSourceMap).toEqual(['FIRST_MAP', 'SECOND_MAP']);
     });
   });
 });

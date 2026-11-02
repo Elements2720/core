@@ -71,18 +71,12 @@ export const createWatchBuild = async (
     buildCtx.hasHtmlChanges = hasHtmlChanges(config, buildCtx);
     buildCtx.hasServiceWorkerChanges = hasServiceWorkerChanges(config, buildCtx);
 
-    if (config.flags.debug) {
-      config.logger.debug(`WATCH_BUILD::watchBuild::onBuild filesAdded: ${formatFilesForDebug(buildCtx.filesAdded)}`);
-      config.logger.debug(
-        `WATCH_BUILD::watchBuild::onBuild filesDeleted: ${formatFilesForDebug(buildCtx.filesDeleted)}`,
-      );
-      config.logger.debug(
-        `WATCH_BUILD::watchBuild::onBuild filesUpdated: ${formatFilesForDebug(buildCtx.filesUpdated)}`,
-      );
-      config.logger.debug(
-        `WATCH_BUILD::watchBuild::onBuild filesWritten: ${formatFilesForDebug(buildCtx.filesWritten)}`,
-      );
-    }
+    // if (config.flags.debug) {
+    config.logger.debug(`WATCH_BUILD::watchBuild::onBuild filesAdded: ${formatFilesForDebug(buildCtx.filesAdded)}`);
+    config.logger.debug(`WATCH_BUILD::watchBuild::onBuild filesDeleted: ${formatFilesForDebug(buildCtx.filesDeleted)}`);
+    config.logger.debug(`WATCH_BUILD::watchBuild::onBuild filesUpdated: ${formatFilesForDebug(buildCtx.filesUpdated)}`);
+    config.logger.debug(`WATCH_BUILD::watchBuild::onBuild filesWritten: ${formatFilesForDebug(buildCtx.filesWritten)}`);
+    // }
 
     // Make sure all files in the module map are still in the fs
     // Otherwise, we can run into build errors because the compiler can think
@@ -158,9 +152,9 @@ export const createWatchBuild = async (
       /**
        * the root directory, e.g. `stencil.config.ts`
        */
-      watchFiles(compilerCtx, config.rootDir, {
-        recursive: false,
-      }),
+      // watchFiles(compilerCtx, config.rootDir, {
+      //   recursive: false,
+      // }),
       /**
        * the external directories, defined in `watchExternalDirs`, e.g. `node_modules`
        */

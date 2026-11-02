@@ -18,6 +18,7 @@ export * as result from './result';
 export * from './serialize';
 export * from './shadow-root';
 export * from './sourcemaps';
+export * from './sourceMapToDataUrl';
 export * from './types';
 export * from './url-paths';
 export * from './util';

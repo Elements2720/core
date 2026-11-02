@@ -118,7 +118,7 @@ export const validateConfig = (
 
   const hashFileNames = config.hashFileNames ?? !devMode;
   const sourceMap = validateSourceMap(config.sourceMap, devMode);
-
+  console.log(config.minifyCss, devMode);
   const validatedConfig: ValidatedConfig = {
     devServer: {}, // assign `devServer` before spreading `config`, in the event 'devServer' is not a key on `config`
     ...config,
@@ -304,7 +304,7 @@ const validateSourceMap = (sourceMap: UnvalidatedConfig['sourceMap'], devMode: b
   if (sourceMap != null && typeof sourceMap === 'object') {
     return {
       sourceMap,
-      sourceMapCss: sourceMap.css === true,
+      sourceMapCss: sourceMap.css === 'inline' ? ('inline' as const) : sourceMap.css === true,
       sourceMapJs: sourceMap.js === true,
     };
   }

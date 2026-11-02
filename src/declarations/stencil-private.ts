@@ -236,6 +236,7 @@ export interface BuildCtx {
   bundleBuildCount: number;
   collections: CollectionCompilerMeta[];
   compilerCtx: CompilerCtx;
+  sourceMapsByTag: Map<string, Map<string, Record<string, string>>>;
   esmBrowserComponentBundle: ReadonlyArray<BundleModule>;
   esmComponentBundle: ReadonlyArray<BundleModule>;
   es5ComponentBundle: ReadonlyArray<BundleModule>;
@@ -286,7 +287,7 @@ export interface BuildCtx {
   /**
    * A promise that resolves to the global styles for the current build.
    */
-  stylesPromise: Promise<string>;
+  stylesPromise: Promise<{ css: string; map?: string }>;
   stylesUpdated: BuildStyleUpdate[];
   timeSpan: LoggerTimeSpan;
   timestamp: string;
@@ -394,6 +395,7 @@ export interface RollupChunkResult {
   isIndex: boolean;
   isBrowserLoader: boolean;
   imports: string[];
+  sourceMapsByMode: Map<string, string[]>;
   moduleFormat: ModuleFormat;
   map?: RollupSourceMap;
 }
@@ -512,7 +514,10 @@ export interface CompilerCtx {
   addWatchFile: (path: string) => void;
   cache: Cache;
   cssModuleImports: Map<string, string[]>;
-  cachedGlobalStyle: string;
+  cachedGlobalStyle: {
+    css: string;
+    map?: SourceMap;
+  };
   collections: CollectionCompilerMeta[];
   compilerOptions: any;
   events: BuildEvents;
@@ -981,13 +986,7 @@ export interface ComponentConstructor {
   deserializers?: ComponentConstructorChangeHandlers;
 }
 
-export interface StyleSourceMapSegment {
-  map: string;
-  length: number;
-}
-
-export type StyleSourceMap = string | StyleSourceMapSegment;
-export type StyleSourceMapValue = StyleSourceMap | StyleSourceMapValue[];
+export type StyleSourceMapValue = string | string[];
 
 /**
  * A mapping from class member names to a list of methods which are watching
@@ -2231,12 +2230,14 @@ export interface TransformCssToEsmInput {
    * is not shared by multiple fields, nor is it a composite of multiple modes).
    */
   mode?: string;
-  sourceMap?: boolean;
+  sourceMap?: boolean | 'inline';
   map?: SourceMap | string;
   minify?: boolean;
   docs?: boolean;
   autoprefixer?: any;
   styleImportData?: string;
+  rootDir?: string;
+  namespace?: string;
 }
 
 export interface TransformCssToEsmOutput {
@@ -2880,3 +2881,5 @@ export interface TelemetryConfig {
   'telemetry.stencil'?: boolean;
   'tokens.telemetry'?: string;
 }
+
+export type Format = 'es' | 'cjs' | 'system';

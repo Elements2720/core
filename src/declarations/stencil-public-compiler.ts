@@ -496,7 +496,7 @@ export type ConfigExtras = ConfigExtrasBase &
   (ConfigExtrasSlotFixes<true, true> | ConfigExtrasSlotFixes<false, boolean>);
 
 export interface Config extends StencilConfig {
-  sourceMapCss?: boolean;
+  sourceMapCss?: boolean | 'inline';
   sourceMapJs?: boolean;
   buildAppCore?: boolean;
   buildDocs?: boolean;
@@ -517,7 +517,7 @@ export interface Config extends StencilConfig {
 }
 
 export interface SourceMapOptions {
-  css?: boolean;
+  css?: boolean | 'inline';
   js?: boolean;
 }
 
@@ -608,7 +608,7 @@ type StrictConfigFields = keyof Pick<
  */
 export type ValidatedConfig = RequireFields<Config, StrictConfigFields> & {
   sourceMap: boolean | SourceMapOptions;
-  sourceMapCss: boolean;
+  sourceMapCss: boolean | 'inline';
   sourceMapJs: boolean;
 };
 
@@ -3242,7 +3242,7 @@ export interface TransformOptions {
   proxy: 'defineproperty' | null;
   style: 'static' | null;
   styleImportData: 'queryparams' | null;
-  sourceMapCss?: boolean;
+  sourceMapCss?: boolean | 'inline';
   target?: string;
 }
 

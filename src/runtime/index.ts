@@ -6,6 +6,7 @@ export { disconnectedCallback } from './disconnected-callback';
 export { getElement } from './element';
 export { createEvent } from './event-emitter';
 export { Fragment } from './fragment';
+export { getPublicPath } from './getPublicPath';
 export { addHostEventListeners } from './host-listener';
 export { Mixin } from './mixin';
 export { getMode, setMode } from './mode';

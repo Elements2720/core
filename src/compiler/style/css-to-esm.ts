@@ -1,11 +1,20 @@
-import { catchError, createJsVarName, DEFAULT_STYLE_MODE, hasError, isString, normalizePath, resolve } from '@utils';
+import {
+  catchError,
+  createJsVarName,
+  DEFAULT_STYLE_MODE,
+  hasError,
+  isString,
+  normalizePath,
+  resolve,
+  sourceMapToDataUrl,
+} from '@utils';
 import { scopeCss } from '@utils/shadow-css';
 import MagicString from 'magic-string';
 import sourceMapMerge from 'merge-source-map';
 import path from 'path';
 
 import type * as d from '../../declarations';
-import { STENCIL_CORE_ID } from '../bundle/entry-alias-ids';
+import { STENCIL_CORE_ID, STENCIL_INTERNAL_ID } from '../bundle/entry-alias-ids';
 import { parseStyleDocs } from '../docs/style-docs';
 import { createCssSourceMap } from '../optimize/minify-css';
 import { optimizeCss } from '../optimize/optimize-css';
@@ -72,7 +81,7 @@ export const transformCssToEsm = async (input: d.TransformCssToEsmInput): Promis
     filePath: input.file,
     map: results.styleMap,
     minify: input.minify !== false,
-    sourceMap: input.sourceMap,
+    sourceMap: !!input.sourceMap,
   });
 
   results.diagnostics.push(...optimizeResults.diagnostics);
@@ -157,7 +166,7 @@ const transformCssToEsmModule = (input: d.TransformCssToEsmInput): d.TransformCs
     results.styleMap = createCssSourceMap(input.input, results.styleText, input.file || 'input.css');
     const previousMap = parseSourceMap(input.map);
     if (previousMap) {
-      results.styleMap = mergeSourceMaps(previousMap, results.styleMap);
+      results.styleMap = sourceMapMerge(previousMap, results.styleMap);
     }
   }
 
@@ -177,8 +186,16 @@ const generateTransformCssToEsm = (
   results: d.TransformCssToEsmOutput,
 ): d.TransformCssToEsmOutput => {
   const s = new MagicString('');
-  results.styleSourceMap = results.styleMap ? sourceMapToDataUrl(results.styleMap) : undefined;
 
+  if (results.styleMap) {
+    delete results.styleMap.file;
+    const namespace = input.namespace ? input.namespace + ':///' : '';
+    const rootDir = input.rootDir || process.cwd();
+    results.styleMap.sources = results.styleMap.sources.map((source) => {
+      return namespace + path.relative(rootDir, source).replace(/\\/g, '/');
+    });
+    results.styleSourceMap = JSON.stringify(results.styleMap);
+  }
   // Escape backslashes first so the escape sequences added below are not
   // re-escaped afterwards. Escaping backslashes last would turn the
   // escaped backtick produced below back into an unescaped backtick,
@@ -221,8 +238,11 @@ const generateTransformCssToEsm = (
 
     appendStyleFactory(s, results);
     s.append(`module.exports = ${results.defaultVarName};`);
-    if (input.sourceMap) {
-      s.append(`\nmodule.exports.sourceMap = ${JSON.stringify(results.styleSourceMap) ?? 'undefined'};`);
+    if (input.sourceMap === true) {
+      s.append(`\nconst { getPublicPath } = require('${STENCIL_INTERNAL_ID}');`);
+      s.append(`\nmodule.exports.sourceMap = getPublicPath() + '${input.tag}.css.map'};`);
+    } else if (input.sourceMap === 'inline') {
+      s.append(`\nmodule.exports.sourceMap = ${sourceMapToDataUrl(results.styleSourceMap)};`);
     }
   } else {
     // ESM
@@ -235,8 +255,11 @@ const generateTransformCssToEsm = (
 
     appendStyleFactory(s, results);
     s.append(`export default ${results.defaultVarName};`);
-    if (input.sourceMap) {
-      s.append(`\nexport const sourceMap = ${JSON.stringify(results.styleSourceMap) ?? 'undefined'};`);
+    if (input.sourceMap === true) {
+      s.append(`\nimport { getPublicPath } from '${STENCIL_INTERNAL_ID}';`);
+      s.append(`\nexport const sourceMap = getPublicPath() + '${input.tag}.css.map';`);
+    } else if (input.sourceMap === 'inline') {
+      s.append(`\nexport const sourceMap = ${sourceMapToDataUrl(results.styleSourceMap)};`);
     }
   }
 
@@ -252,9 +275,6 @@ const appendStyleFactory = (output: MagicString, results: d.TransformCssToEsmOut
   output.append(`\`${results.styleText}\`;\n`);
 };
 
-const sourceMapToDataUrl = (sourceMap: d.SourceMap) =>
-  `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(sourceMap)).toString('base64')}`;
-
 const parseSourceMap = (map?: d.SourceMap | string) => {
   if (typeof map === 'string') {
     try {
@@ -264,11 +284,6 @@ const parseSourceMap = (map?: d.SourceMap | string) => {
     }
   }
   return map;
-};
-
-const mergeSourceMaps = (previousMap: d.SourceMap, nextMap: d.SourceMap) => {
-  // The package maps generated positions in `nextMap` through the original positions in `previousMap`.
-  return sourceMapMerge(previousMap, nextMap) as d.SourceMap;
 };
 
 /**

@@ -1,4 +1,12 @@
-import { hasError, isOutputTargetDistCollection, join, mergeIntoWith, normalizeFsPath, relative } from '@utils';
+import {
+  hasError,
+  isOutputTargetDistCollection,
+  join,
+  mergeIntoWith,
+  normalizeFsPath,
+  relative,
+  sourceMapToDataUrl,
+} from '@utils';
 import type { Plugin } from 'rollup';
 
 import type * as d from '../../declarations';
@@ -97,6 +105,8 @@ export const extTransformsPlugin = (
       if (data != null) {
         let cmpStyles: ComponentStyleMap | undefined = undefined;
         let cmp: d.ComponentCompilerMeta | undefined = undefined;
+        let sourceMaps: Record<string, string> | undefined = undefined;
+
         const filePath = normalizeFsPath(id);
         const code = await compilerCtx.fs.readFile(filePath);
         if (typeof code !== 'string') {
@@ -139,6 +149,20 @@ export const extTransformsPlugin = (
             allCmpStyles.set(scopeId, new Map());
           }
           cmpStyles = allCmpStyles.get(scopeId);
+
+          if (config.sourceMapCss === true) {
+            if (!buildCtx.sourceMapsByTag.has(data.tag)) {
+              buildCtx.sourceMapsByTag.set(data.tag, new Map<string, Record<string, string>>());
+            }
+
+            const sourceMapsByMode = buildCtx.sourceMapsByTag.get(data.tag);
+
+            if (!sourceMapsByMode.has(data.mode)) {
+              sourceMapsByMode.set(data.mode, {});
+            }
+
+            sourceMaps = sourceMapsByMode.get(data.mode);
+          }
         }
 
         const cssTransformResults = await compilerCtx.worker.transformCssToEsm({
@@ -154,6 +178,8 @@ export const extTransformsPlugin = (
           minify: config.minifyCss,
           autoprefixer: config.autoprefixCss,
           docs: config.buildDocs,
+          rootDir: config.rootDir,
+          namespace: config.namespace,
         });
 
         /**
@@ -164,6 +190,10 @@ export const extTransformsPlugin = (
             styleText: cssTransformResults.styleText,
             styleSourceMap: cssTransformResults.styleSourceMap,
           });
+        }
+
+        if (sourceMaps) {
+          sourceMaps[filePath] = cssTransformResults.styleSourceMap;
         }
 
         // Set style docs
@@ -206,9 +236,9 @@ export const extTransformsPlugin = (
           const styleSourceMap = !config.sourceMapCss
             ? undefined
             : styleEntries.length === 1
-              ? styleEntries[0]?.styleSourceMap
+              ? sourceMapToDataUrl(styleEntries[0]?.styleSourceMap)
               : styleEntries.every((entry) => entry?.styleSourceMap != null)
-                ? styleEntries.map((entry) => entry.styleSourceMap!)
+                ? styleEntries.map((entry) => sourceMapToDataUrl(entry.styleSourceMap))
                 : undefined;
 
           buildCtx.stylesUpdated.push({

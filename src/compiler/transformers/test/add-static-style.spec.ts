@@ -132,6 +132,7 @@ describe('add-static-style', () => {
       const output = classMembers
         .map((member) => printer.printNode(ts.EmitHint.Unspecified, member, sourceFile))
         .join('\n');
+
       expect(output).toContain('static get sourceMap()');
       expect(output).toContain('MyComponentMdStyleSourceMap0');
     });

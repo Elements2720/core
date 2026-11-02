@@ -5,9 +5,14 @@ import type { LoadResult, Plugin, ResolveIdResult, TransformResult } from 'rollu
 import ts from 'typescript';
 
 import type * as d from '../../declarations';
-import type { BundlePlatform } from './bundle-interface';
 import { removeCollectionImports } from '../transformers/remove-collection-imports';
-import { APP_DATA_CONDITIONAL, STENCIL_APP_DATA_ID, STENCIL_APP_GLOBALS_ID } from './entry-alias-ids';
+import type { BundlePlatform } from './bundle-interface';
+import {
+  APP_DATA_CONDITIONAL,
+  STENCIL_APP_DATA_ID,
+  STENCIL_APP_GLOBALS_ID,
+  STENCIL_INTERNAL_ID,
+} from './entry-alias-ids';
 
 /**
  * A Rollup plugin which bundles application data.
@@ -63,7 +68,7 @@ export const appDataPlugin = (
       if (id === STENCIL_APP_GLOBALS_ID) {
         const s = new MagicString(``);
         appendGlobalScripts(globalScripts, s);
-        await appendGlobalStyles(buildCtx, s, platform);
+        await appendGlobalStyles(config, buildCtx, s, platform);
         return s.toString();
       }
       if (id === STENCIL_APP_DATA_ID) {
@@ -214,16 +219,31 @@ const appendGlobalScripts = (globalScripts: GlobalScript[], s: MagicString) => {
 /**
  * Appends the global styles to the MagicString.
  *
+ * @param config the config
  * @param buildCtx the build context
  * @param s the MagicString to append the global styles onto
  * @param platform the platform that is being built
  */
-const appendGlobalStyles = async (buildCtx: d.BuildCtx, s: MagicString, platform: BundlePlatform) => {
+const appendGlobalStyles = async (config: d.Config, buildCtx: d.BuildCtx, s: MagicString, platform: BundlePlatform) => {
   const { addGlobalStyleToComponents } = buildCtx.config.extras;
+
   const shouldIncludeGlobalStyles =
     addGlobalStyleToComponents === true || (addGlobalStyleToComponents === 'client' && platform === 'client');
-  const globalStyles = buildCtx.config.globalStyle && shouldIncludeGlobalStyles ? await buildCtx.stylesPromise : '';
-  s.append(`export const globalStyles = ${JSON.stringify(globalStyles)};\n`);
+
+  const { css, map } =
+    buildCtx.config.globalStyle && shouldIncludeGlobalStyles ? await buildCtx.stylesPromise : { css: '' };
+
+  s.append(`export const globalStyles = ${JSON.stringify(css)};\n`);
+
+  if (config.sourceMapCss === true) {
+    s.append(`import { getPublicPath } from '${STENCIL_INTERNAL_ID}/client';\n`);
+    s.append(`export const globalStylesMap = getPublicPath() + '${map}';\n`);
+  } else if (config.sourceMapCss === 'inline') {
+    s.append(`export const globalStylesMap = ${map};\n`);
+  }else {
+    s.append(`export const globalStylesMap = '';`);
+  }
+
 };
 
 /**

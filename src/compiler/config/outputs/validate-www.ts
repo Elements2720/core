@@ -108,7 +108,7 @@ const validateWwwOutputTarget = (
   }
 
   if (!isString(outputTarget.buildDir)) {
-    outputTarget.buildDir = 'build';
+    outputTarget.buildDir = '.';
   }
 
   if (!isAbsolute(outputTarget.buildDir)) {

@@ -17,6 +17,7 @@ export class BuildContext implements d.BuildCtx {
   compilerCtx: d.CompilerCtx;
   components: d.ComponentCompilerMeta[] = [];
   componentGraph = new Map<string, string[]>();
+  sourceMapsByTag = new Map<string, Map<string, Record<string, string>>>();
   config: d.ValidatedConfig;
   data: any = {};
   buildStats?: result.Result<d.CompilerBuildStats, { diagnostics: d.Diagnostic[] }> = undefined;
@@ -56,7 +57,7 @@ export class BuildContext implements d.BuildCtx {
   scriptsDeleted: string[] = [];
   startTime = Date.now();
   styleBuildCount = 0;
-  stylesPromise: Promise<string> = null;
+  stylesPromise: Promise<{ css: string; map?: string }> = null;
   stylesUpdated: d.BuildStyleUpdate[] = [];
   timeSpan: d.LoggerTimeSpan = null;
   timestamp: string;
